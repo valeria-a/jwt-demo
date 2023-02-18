@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+
+    <script>
+
+        function getUserData() {
+            fetch('http://127.0.0.1:8000/me/', 
+            {headers: {
+                'authorization': 'Bearer ' + localStorage.getItem('access')
+            }})
+            .then((response) => response.json())
+            .then((json) =>
+                {
+                    console.log(json)
+                    document.getElementById('user-data').innerText = `Hello ${json.first_name} ${json.last_name}!`
+                })
+            .catch((error) =>
+                {
+                    console.error(error)
+                })
+        }
+
+        window.onload = () => {
+            getUserData()
+        }
+
+        function obtainTokens(event) {
+
+            event.preventDefault()
+
+            formData = new FormData(event.target)
+            
+            fetch('http://127.0.0.1:8000/api/token/', {method: 'POST', body: formData})
+            .then((response) => {
+                console.log(response)
+                return response.json()
+            })
+            .then((json) => {
+                console.log(json)
+                localStorage.setItem('access', json.access)
+                localStorage.setItem('refresh', json.refresh)
+                getUserData()
+            })
+            .catch((error) => console.error(error))
+        }
+
+
+        function getVersion() {
+            fetch('http://127.0.0.1:8000/version/')
+            .then((response) => response.json())
+            .then((json) => {
+                console.log(json)
+                document.getElementById('version').innerText = `Version: ${json.version}`
+            })
+            .catch((error) => console.error(error))
+        }
+
+    </script>
+
+</head>
+<body>
+
+    <div>
+        <p id="user-data"></p>
+    </div>
+
+    <!-- <button onclick="getRestrictedData()">Display restricted data</button> -->
+
+    <button onclick="getVersion()">Get version</button>
+
+    <p id="version"></p>
+
+    <form onsubmit="obtainTokens(event)">
+
+        <label for="username">Username:</label><br>
+        <input type="text" id="username" name="username" value="">
+
+        <br>
+
+        <label for="password">Password:</label><br>
+        <input type="password" id="password" name="password" value="">
+
+        <br>
+
+        <input type="submit" value="Login">
+
+    </form>
+
+</body>
+</html>
